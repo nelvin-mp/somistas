@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaña Yunia Pujay 2026</title>
+    <style>
+        :root {
+            --azul-partido: #0052a1;
+            --rojo-vibrante: #e30613;
+            --blanco: #ffffff;
+            --gris-borde: #cccccc;
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: var(--blanco);
+        }
+
+        .contenedor-movil {
+            width: 360px;
+            height: 640px;
+            background-color: var(--azul-partido);
+            border-radius: 35px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 6px solid #2a2a2a;
+            overflow: hidden;
+        }
+
+        .pantalla {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .activa { display: flex; }
+
+        /* Pantalla 1 */
+        #ventana1 { justify-content: center; }
+        .fecha { font-size: 1.5rem; font-style: italic; margin-bottom: 20px; }
+        .nombre-candidata { font-size: 2.5rem; margin: 0; line-height: 1; }
+        .apellido-candidata { color: var(--rojo-vibrante); }
+
+        .btn-aplastame {
+            margin-top: 50px;
+            background-color: var(--rojo-vibrante);
+            color: var(--blanco);
+            border: none;
+            padding: 18px 35px;
+            border-radius: 18px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            animation: latido 1.6s infinite;
+        }
+
+        @keyframes latido {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+
+        /* Pantalla 2 */
+        .grid-voto {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .cuadro {
+            background: var(--blanco);
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 2px solid var(--gris-borde);
+        }
+
+        .imagen-corazon { width: 85%; height: 85%; object-fit: contain; }
+        .numero-dos { font-size: 5.5rem; color: var(--azul-partido); font-weight: 900; }
+
+        canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            touch-action: none;
+        }
+
+        .btn-accion-sim {
+            margin-top: 25px;
+            background: var(--blanco);
+            color: var(--azul-partido);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-volver {
+            margin-top: 15px;
+            background: none;
+            border: 2px solid var(--blanco);
+            color: var(--blanco);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor-movil">
+    <div id="ventana1" class="pantalla activa">
+        <div class="fecha">Este 12 de abril</div>
+        <h1 class="nombre-candidata">Yunia<br><span class="apellido-candidata">PUJAY</span></h1>
+        <button class="btn-aplastame" onclick="irSimulador()">Aplástame aquí</button>
+    </div>
+
+    <div id="ventana2" class="pantalla">
+        <h2>¿CÓMO VOTAR?</h2>
+        <div class="grid-voto">
+            <div class="cuadro"><img src="somos.jpg" class="imagen-corazon"></div>
+            <div class="cuadro"><span class="numero-dos">2</span></div>
+            <div class="cuadro">
+                <img src="somos.jpg" class="imagen-corazon" style="opacity: 0.15;">
+                <canvas id="l1"></canvas>
+            </div>
+            <div class="cuadro" style="border: 3px dashed #ccc;">
+                <canvas id="l2"></canvas>
+            </div>
+        </div>
+        <button class="btn-accion-sim" onclick="limpiar()">BORRAR Y REPETIR</button>
+        <button class="btn-volver" onclick="irPortada()">← VOLVER</button>
+    </div>
+</div>
+
+<script>
+    function irSimulador() {
+        document.getElementById('ventana1').classList.remove('activa');
+        document.getElementById('ventana2').classList.add('activa');
+        initCanvas('l1');
+        initCanvas('l2');
+    }
+
+    function irPortada() {
+        document.getElementById('ventana2').classList.remove('activa');
+        document.getElementById('ventana1').classList.add('activa');
+    }
+
+    function initCanvas(id) {
+        const cvs = document.getElementById(id);
+        const ctx = cvs.getContext('2d');
+        cvs.width = cvs.offsetWidth;
+        cvs.height = cvs.offsetHeight;
+        let drawing = false;
+
+        const start = (e) => {
+            drawing = true;
+            ctx.beginPath();
+            const p = getPos(e, cvs);
+            ctx.moveTo(p.x, p.y);
+        };
+        const move = (e) => {
+            if (!drawing) return;
+            const p = getPos(e, cvs);
+            ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = '#0052a1';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        };
+
+        cvs.onmousedown = start; cvs.onmousemove = move;
+        window.onmouseup = () => drawing = false;
+        cvs.ontouchstart = (e) => { e.preventDefault(); start(e); };
+        cvs.ontouchmove = (e) => { e.preventDefault(); move(e); };
+    }
+
+    function getPos(e, c) {
+        const r = c.getBoundingClientRect();
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: x - r.left, y: y - r.top };
+    }
+
+    function limpiar() {
+        const c1 = document.getElementById('l1');
+        const c2 = document.getElementById('l2');
+        c1.getContext('2d').clearRect(0,0,c1.width,c1.height);
+        c2.getContext('2d').clearRect(0,0,c2.width,c2.height);
+    }
+</script>
+
+</body>
+</html>
